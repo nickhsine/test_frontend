@@ -1,0 +1,56 @@
+{
+  "plugins": [
+    [
+      "system-import-transformer", 
+      {
+        "commonJS": {
+          "useRequireEnsure": true
+        }
+      }
+    ],
+    [
+      "module-resolver",
+      {
+        "root": ["."],
+        "alias": {
+          "components": "./src/components",
+          "static": "./static",
+          "helpers": "./src/helpers"
+        }
+      }
+    ],
+    [
+      "wrap-in-js",
+      {
+        "extensions": ["css$", "scss$"]
+      }
+    ],
+    [
+      "styled-components",
+      {
+        "ssr": true,
+        "displayName": true,
+        "preprocess": false
+      }
+    ],
+    [
+      "inline-react-svg", {
+        "svgo": {
+          "plugins": [
+            {
+              "cleanupIDs": false
+            }
+          ]
+        }
+      }
+    ],
+    [
+      "transform-assets-import-to-string", 
+      {
+        "extensions": [".jpg", ".png"],
+        "baseDir": "static"
+      }
+    ]
+  ],
+  "presets": ["env", "stage-0", "react"]
+}

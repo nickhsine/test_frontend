@@ -1,0 +1,14 @@
+const types = {
+  // actions fetching events
+  START_TO_GET_EVENTS: 'START_TO_GET_EVENTS',
+  ERROR_TO_GET_EVENTS: 'ERROR_TO_GET_EVENTS',
+  GET_LATEST_EVENTS: 'GET_LATEST_EVENTS',
+  GET_OLDER_EVENTS: 'GET_OLDER_EVENTS',
+
+  // actions for viewing events
+  START_TO_VIEW_EVENT: 'START_TO_VIEW_EVENT',
+  ERROR_TO_VIEW_EVENT: 'ERROR_TO_VIEW_EVENT',
+  VIEWED_EVENT: 'VIEWED_EVENT',
+}
+
+export default types
