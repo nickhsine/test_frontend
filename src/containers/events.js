@@ -1,3 +1,5 @@
+/* global socket */
+/* eslint no-console: 0 */
 import EventCard from '../components/event-card'
 import PropTypes from 'prop-types'
 import React, { PureComponent } from 'react'
@@ -5,7 +7,7 @@ import get from 'lodash.get'
 import styled from 'styled-components'
 import { CSSTransitionGroup } from 'react-transition-group'
 import { connect } from 'react-redux'
-import { fetchLatestEvents, fetchOlderEvents, viewEvent } from '../redux/actions/index'
+import { fetchEvents, newAEvent, viewEvent } from '../redux/actions/index'
 
 const LIMIT = 5
 const OFFSET = 0
@@ -64,7 +66,7 @@ class Events extends PureComponent {
    */
   static fetchData({ store }) {
     // call action
-    return fetchLatestEvents(OFFSET, LIMIT)(store.dispatch)
+    return fetchEvents(OFFSET, LIMIT)(store.dispatch)
   }
 
   constructor(props) {
@@ -74,22 +76,35 @@ class Events extends PureComponent {
 
   componentWillMount() {
     if (_.get(this.props, 'events.items.length', 0) < LIMIT) {
-      this.props.fetchLatestEvents(OFFSET, LIMIT)
+      this.props.fetchEvents(OFFSET, LIMIT)
     }
   }
 
   componentDidMount() {
-    // polling data periodically
-    const fetchEvents = this.props.fetchLatestEvents
+    if (socket) {
+      // pull data by WebSocket
+      const onmessage = (evt) => {
+        const data = JSON.parse(evt.data)
+        this.props.newAEvent(data)
+      }
+      socket.onmessage = onmessage.bind(this)
+    } else {
+      // fallback - polling data periodically
+      const _fetchEvents = this.props.fetchEvents
 
-    const fetchEventsPeriodically = () => {
-      fetchEvents()
-        .then(() => {
-          setTimeout(fetchEventsPeriodically, 1000)
-        })
+      const fetchEventsPeriodically = () => {
+        _fetchEvents()
+          .then(() => {
+            setTimeout(fetchEventsPeriodically, 1000)
+          })
+      }
+
+      setTimeout(fetchEventsPeriodically, 1000)
     }
+  }
 
-    setTimeout(fetchEventsPeriodically, 1000)
+  onMessageReceived = (data) => {
+    console.log(data)
   }
 
   _loadMore() {
@@ -97,12 +112,13 @@ class Events extends PureComponent {
     const count = _.get(events, 'items.length', 0)
     const total = _.get(events, 'total', 0)
     if (count <= total) {
-      this.props.fetchOlderEvents(count, LIMIT)
+      this.props.fetchEvents(count, LIMIT)
     }
   }
 
   render() {
     const { events } = this.props
+    console.log('render events:', events)
     const items = _.get(events, 'items', [])
     const total = _.get(events, 'total', 0)
 
@@ -157,9 +173,9 @@ class Events extends PureComponent {
 
 Events.propTypes = {
   events: PropTypes.object.isRequired,
-  fetchOlderEvents: PropTypes.func.isRequired,
-  fetchLatestEvents: PropTypes.func.isRequired,
+  fetchEvents: PropTypes.func.isRequired,
   viewEvent: PropTypes.func.isRequired,
+  newAEvent: PropTypes.func.isRequired,
 }
 
 Events.contextTypes = {
@@ -172,4 +188,4 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps, { fetchLatestEvents, fetchOlderEvents, viewEvent })(Events)
+export default connect(mapStateToProps, { fetchEvents, newAEvent, viewEvent })(Events)

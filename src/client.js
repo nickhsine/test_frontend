@@ -8,6 +8,12 @@ import { Provider } from 'react-redux'
 import { Router, match, browserHistory } from 'react-router'
 import { syncHistoryWithStore } from 'react-router-redux'
 
+if (window.WebSocket) {
+  global.socket = new WebSocket('ws://localhost:8080/v1/ws')
+} else {
+  console.log('WebSocket is not provided')
+}
+
 let reduxState
 if (window.__REDUX_STATE__) {
   reduxState = window.__REDUX_STATE__

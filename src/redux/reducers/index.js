@@ -1,7 +1,8 @@
-
+/* eslint no-console:0 */
 import concat from 'lodash.concat'
 import get from 'lodash.get'
 import merge from 'lodash.merge'
+import uniq from 'lodash.uniq'
 import types from '../action-types'
 import { combineReducers } from 'redux'
 import { routerReducer } from 'react-router-redux'
@@ -10,6 +11,7 @@ const _ = {
   concat,
   get,
   merge,
+  uniq,
 }
 
 /**
@@ -33,38 +35,34 @@ function events(state = {}, action = {}) {
         isFetching: false,
       })
     }
-    case types.GET_LATEST_EVENTS: {
-      const latestTimestamp = _.get(state, 'items.0.starting_timestamp', 0)
-      let newItems = _.get(action, 'payload.items', [])
-      newItems = newItems.filter((item) => {
-        return item.starting_timestamp > latestTimestamp
+    case types.GET_EVENTS: {
+      console.log('action:', action)
+      const newItems = _.get(action, 'payload.items', [])
+      let items = _.concat(newItems, state.items || [])
+      items = _.uniq(items, 'event_id')
+      items.sort((e1, e2) => {
+        return e2.starting_timestamp - e1.starting_timestamp
       })
       return _.merge({}, state, {
         error: null,
-        isFetching: false,
-        items: _.concat(newItems, state.items || []),
+        isfetching: false,
+        items,
         limit: _.get(action, 'payload.limit', 10),
-        offset: _.get(action, 'payload.offset', 0),
         total: _.get(action, 'payload.total', 0),
       })
     }
-    case types.GET_OLDER_EVENTS: {
-      const len = _.get(state, 'items.length', 0)
-      let olderItems = _.get(action, 'payload.items', [])
-      if (len > 0) {
-        const oldestTimestamp = _.get(state, ['items', len - 1, 'starting_timestamp'], 0)
-        olderItems = olderItems.filter((item) => {
-          return item.starting_timestamp < oldestTimestamp || oldestTimestamp === 0
-        })
+    case types.NEW_A_EVENT: {
+      const newItem = _.get(action, 'payload.item')
+      const items = _.get(state, 'items', [])
+      if (newItem) {
+        items.unshift(newItem)
       }
-
       return _.merge({}, state, {
         error: null,
-        isFetching: false,
-        items: _.concat(state.items || [], olderItems),
-        limit: _.get(action, 'payload.limit', 10),
-        offset: _.get(action, 'payload.offset', 0),
-        total: _.get(action, 'payload.total', 0),
+        isfetching: false,
+        items,
+        limit: _.get(state, 'limit', 10),
+        total: _.get(state, 'total', 0) + 1,
       })
     }
     default:

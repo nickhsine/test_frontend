@@ -13,7 +13,6 @@ const apiEndpoints = {
 }
 
 const LIMIT = 10
-const OFFSET = 0
 
 const apiConfig = {
   protocol: 'http',
@@ -99,15 +98,17 @@ export function viewEvent(eventID) {
 }
 
 /**
- * Fetch events from api layer
+ * Fetch events
  *
- * @param {string} url to fetch
- * @param {string} type=types.GET_LATEST_EVENTS action type
+ * @param {number} offset=0 events you want to skip
+ * @param {number} limit=5 events number you want per request
  * @returns {function}
  */
-export function fetchEvents(url, type = types.GET_LATEST_EVENTS) {
+export function fetchEvents(offset = 0, limit = LIMIT) {
   // dispatch, getState are passed by redux.connect
   return (dispatch) => {
+    const path = `${apiEndpoints.newEvents}?limit=${limit}&offset=${offset}`
+    const url = formAPIURL(path)
     dispatch({
       type: types.START_TO_GET_EVENTS,
       url,
@@ -119,15 +120,12 @@ export function fetchEvents(url, type = types.GET_LATEST_EVENTS) {
       const data = _.get(response, 'data.data', {})
       const total = _.get(data, 'total', 0)
       const events = _.get(data, 'events', [])
-      const limit = _.get(data, 'limit', LIMIT)
-      const offset = _.get(data, 'offset', OFFSET)
       dispatch({
-        type,
+        type: types.GET_EVENTS,
         payload: {
           items: events,
           total,
           limit,
-          offset,
         },
       })
     }).catch((err) => {
@@ -141,35 +139,13 @@ export function fetchEvents(url, type = types.GET_LATEST_EVENTS) {
   }
 }
 
-/**
- * Fetch latest events
- *
- * @param {number} offset=0 events you want to skip
- * @param {number} limit=5 events number you want per request
- * @returns {function}
- */
-export function fetchLatestEvents(offset = 0, limit = 5) {
+export function newAEvent(evt) {
   return (dispatch) => {
-    const path = `${apiEndpoints.newEvents}?limit=${limit}&offset=${offset}`
-    const url = formAPIURL(path)
-
-    return fetchEvents(url, types.GET_LATEST_EVENTS)(dispatch)
-  }
-}
-
-
-/**
- * Fetch older events
- *
- * @param {number} offset=0 events you want to skip
- * @param {number} limit=5 events number you want per request
- * @returns {function}
- */
-export function fetchOlderEvents(offset = 0, limit = 5) {
-  return (dispatch) => {
-    const path = `${apiEndpoints.newEvents}?limit=${limit}&offset=${offset}`
-    const url = formAPIURL(path)
-
-    return fetchEvents(url, types.GET_OLDER_EVENTS)(dispatch)
+    dispatch({
+      type: types.NEW_A_EVENT,
+      payload: {
+        item: evt,
+      },
+    })
   }
 }
