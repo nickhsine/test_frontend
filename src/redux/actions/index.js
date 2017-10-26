@@ -1,3 +1,4 @@
+/* eslint no-console:0 */
 import axios from 'axios'
 import types from '../action-types'
 import get from 'lodash.get'

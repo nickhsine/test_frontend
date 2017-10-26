@@ -177,6 +177,7 @@ Events.propTypes = {
   fetchEvents: PropTypes.func.isRequired,
   viewEvent: PropTypes.func.isRequired,
   newAEvent: PropTypes.func.isRequired,
+  tagEvent: PropTypes.func.isRequired,
 }
 
 Events.contextTypes = {
