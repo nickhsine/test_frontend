@@ -7,7 +7,7 @@ import get from 'lodash.get'
 import styled from 'styled-components'
 import { CSSTransitionGroup } from 'react-transition-group'
 import { connect } from 'react-redux'
-import { fetchEvents, newAEvent, viewEvent } from '../redux/actions/index'
+import { fetchEvents, newAEvent, viewEvent, tagEvent } from '../redux/actions/index'
 
 const LIMIT = 5
 const OFFSET = 0
@@ -141,6 +141,7 @@ class Events extends PureComponent {
             startingTimestamp={startingTimestamp}
             thumbnail={thumbnail}
             onViewing={this.props.viewEvent}
+            tagEvent={this.props.tagEvent}
           />
         )
       }
@@ -188,4 +189,6 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps, { fetchEvents, newAEvent, viewEvent })(Events)
+export default connect(mapStateToProps, {
+  fetchEvents, newAEvent, viewEvent, tagEvent,
+})(Events)

@@ -12,7 +12,15 @@ const Container = styled.div`
   margin-bottom: 30px;
 `
 
+const CloseBT = styled.div`
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+`
+
 const Content = styled.ul`
+  cursor: pointer;
   margin: 0 auto;
   width: 80%;
   list-style-type: none;
@@ -31,6 +39,11 @@ const ViewEvent = styled.div`
   cursor: pointer;
 `
 
+const Tag = styled.button`
+  font-size: 20px;
+  background-color: ${props => (props.isToggled ? '#e2e2e2' : '#FFF')}
+`
+
 export default class EventCard extends Component {
   static propTypes = {
     cameraID: PropTypes.string.isRequired,
@@ -40,6 +53,7 @@ export default class EventCard extends Component {
     prediction: PropTypes.string,
     startingTimestamp: PropTypes.number.isRequired,
     thumbnail: PropTypes.string,
+    tagEvent: PropTypes.func.isRequired,
   }
   static defaultProps = {
     isViewed: false,
@@ -51,13 +65,35 @@ export default class EventCard extends Component {
     super(props)
     this.state = {
       isViewed: props.isViewed,
+      isToggled: true,
+      selectedTag: '',
     }
     this.handleViewing = this._handleViewing.bind(this)
+    this.handleClick = this._handleClick.bind(this)
+    this.handleToggle = this._handleToggle.bind(this)
   }
+
+  _handleToggle() {
+    this.setState({
+      isToggled: !this.state.isToggled,
+    })
+  }
+
+  _handleClick(e, tag) {
+    e.stopPropagation()
+    const setState = () => {
+      this.setState({
+        isToggled: !this.state.isToggled,
+        selectedTag: tag,
+      })
+    }
+    this.props.tagEvent(this.props.eventID, tag)
+      .then(setState.bind(this))
+  }
+
 
   _handleViewing(eventID) {
     const self = this
-    console.log('handleViewing...')
     this.props.onViewing(eventID)
       .then(() => {
         console.log('handled')
@@ -75,9 +111,25 @@ export default class EventCard extends Component {
     const {
       cameraID, eventID, prediction, startingTimestamp, thumbnail,
     } = this.props
-    const { isViewed } = this.state
+    const { isViewed, isToggled, selectedTag } = this.state
+
+    const tags = ['people', 'auto', 'animal', 'other']
+
+    const tagsJSX = isToggled ? null : tags.map((tag) => {
+      return (
+        <Tag
+          key={tag}
+          onClick={(e) => { this.handleClick(e, tag) }}
+          isToggled={tag === selectedTag}
+        >{tag}
+        </Tag>
+      )
+    })
+
+
     return (
       <Container>
+        { isToggled ? null : <CloseBT onClick={this.handleToggle}>X</CloseBT> }
         <ViewEvent
           onClick={() => { this.handleViewing(eventID) }}
         >
@@ -85,12 +137,16 @@ export default class EventCard extends Component {
             <ViewedSVG /> : <NotViewSVG />
           }
         </ViewEvent>
-        <Content>
+        <Content
+          onClick={this.handleToggle}
+        >
           <Item>EventID: {eventID}</Item>
+          <Item>Tag: {selectedTag}</Item>
           <Item>cameraID: {cameraID}</Item>
           <Item>prediction: {prediction}</Item>
           <Item>startingTime: {startingTimestamp}</Item>
           <Item>thumbnail: {thumbnail}</Item>
+          {tagsJSX}
         </Content>
       </Container>
     )

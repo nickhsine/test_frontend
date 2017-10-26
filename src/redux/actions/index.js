@@ -45,6 +45,13 @@ const formAPIURL = (path, toEncode = true) => {
   return `${apiConfig.protocol}://${host}:${apiConfig.port}${apiConfig.version}${_path}`
 }
 
+export function tagEvent(eventID, tag) {
+  return (dispatch) => { //eslint-disable-line
+    console.log(`tag event id ${eventID} with tag ${tag}`)
+    return Promise.resolve()
+  }
+}
+
 export function createEvent(event) {
   const path = apiEndpoints.newEvents
   const url = formAPIURL(path)
