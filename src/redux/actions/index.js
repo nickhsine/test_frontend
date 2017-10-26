@@ -31,9 +31,9 @@ const apiConfig = {
  */
 const formAPIURL = (path, toEncode = true) => {
   const _path = toEncode ? encodeURI(path) : path
-  /* For build docker image
-  const host = apiConfig.host
+  const { host } = apiConfig
 
+  /*
   console.log('__SERVER__', __SERVER__)
   if (__SERVER__) {
     host = 'api'
@@ -42,7 +42,7 @@ const formAPIURL = (path, toEncode = true) => {
   */
 
   // TODO add switch case to adpot production api configuration
-  return `${apiConfig.protocol}://${apiConfig.host}:${apiConfig.port}${apiConfig.version}${_path}`
+  return `${apiConfig.protocol}://${host}:${apiConfig.port}${apiConfig.version}${_path}`
 }
 
 export function createEvent(event) {
